@@ -1,0 +1,129 @@
+asyncapi: '2.4.0'
+id: "urn:com:kafka:demo:async"
+info:
+  title: Cluster kafka Demo
+  version: '1.0.0'
+  contact: 
+    name: "Nome dados demo kafka"
+    url: "http://demo.kafka.com.br"
+    email: "suporte@demokafka.com.br"
+  description: |
+    Esse evento descreve a criação do produto.
+    ### Algumas funcionalidades:
+    * Produto
+    * Preço
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  production:
+    url: prd-bootstrap.demokafka.com.br
+    protocol:  kafka
+    protocolVersion: "1.0.0"
+    description: Esse é o cluster kafka de produção
+    variables:
+      port:
+        default: '9092'
+   
+  staging:
+    url: sta-bootstrap.demokafka.com.br
+    protocol:  kafka
+    protocolVersion: "1.0.0"
+    description: Esse é o cluster kafka de staging
+    variables:
+      port:
+        default: '9092'
+   
+  
+channels:
+  produto-alterado:
+    description: Esse topico representa produto criado  
+    
+    publish:
+      bindings:
+        kafka:
+          groupId: my-group
+      summary: Enviar informações de criação do produto.
+      operationId: pub_produto_alterado 
+      tags:
+        - name: produto      
+        - name: preço
+        - name: descricao         
+      message:
+        $ref: '#/components/messages/produto-mensagem'
+      traits:
+        - bindings:
+            produto-alterado-binding:
+              partitions: "3"     
+    subscribe:
+      summary: Lê informações da criação do produto.
+      operationId: sub_produto_alterado 
+      bindings:
+        kafka:
+          groupId: group-asyncapi
+          clientId: client-asyncapi
+          bindingVersion: "0.1.0"
+      tags:
+        - name: produto      
+        - name: preço
+        - name: descricao         
+      message:
+        $ref: '#/components/messages/produto-mensagem'
+      traits:
+        - bindings:
+            produto-alterado-binding:
+              partitions: "3"             
+                
+  
+
+components:
+  messages:
+    produto-mensagem:
+      name: Mensagem para o evento produto
+      title: Produto
+      contentType: application/json
+      summary: Evento para o produto
+      payload:
+         $ref: "#/components/schemas/produtoPayload"
+      examples: [
+        {
+          "name": "produto-criado-1s",
+          "summary": "Exemplo de mensagem",
+          "headers": {
+            "correlationId": "my-correlation-id",
+            "applicationInstanceId": "myInstanceId"
+          },
+          "payload": {
+                   
+                          "idProduto":1,      
+                          "descricao":"Celular bom",                  
+                          "preco":1.99,
+                          "dataAtualizacao":"2022-05-23T13:06:42.375-0300"
+
+          }
+        }
+      ]
+
+  schemas:
+    produtoPayload:
+      type: object
+      schemaFormat: application/schema+json
+      properties:
+        idProduto:
+          type: integer
+          minimum: 0
+          description: Id Produto.
+          format": "int64"
+        descricao:
+          type: string       
+          description: Descrição produto.     
+        preco:
+          type: number       
+          format": "double"    
+          description: Preço do produto.      
+        dataAtualizacao:
+          type: string      
+          description: Data da alteração/criação do produto. 
+          format": "date-time"     
+    
