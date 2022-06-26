@@ -25,15 +25,7 @@ servers:
     variables:
       port:
         default: '9092'
-   
-  staging:
-    url: sta-bootstrap.demokafka.com.br
-    protocol:  kafka
-    protocolVersion: "1.0.0"
-    description: Esse é o cluster kafka de staging
-    variables:
-      port:
-        default: '9092'
+
    
   
 channels:
@@ -43,6 +35,9 @@ channels:
     publish:
       bindings:
         kafka:
+          key:
+            type: string
+            description: Identificador
           groupId: my-group
       summary: Enviar informações de criação do produto.
       operationId: pub_produto_alterado 
@@ -86,29 +81,29 @@ components:
       summary: Evento para o produto
       payload:
          $ref: "#/components/schemas/produtoPayload"
-      examples: [
-        {
-          "name": "produto-criado-1s",
-          "summary": "Exemplo de mensagem",
-          "headers": {
-            "correlationId": "my-correlation-id",
-            "applicationInstanceId": "myInstanceId"
-          },
-          "payload": {
-                   
-                          "idProduto":1,      
-                          "descricao":"Celular bom",                  
-                          "preco":1.99,
-                          "dataAtualizacao":"2022-05-23T13:06:42.375-0300"
-
-          }
-        }
-      ]
-
+      examples:        
+        - name: "produto-criado"
+          summary: "Exemplo de mensagem para o produto criado"
+          headers: 
+            correlationId": "my-correlation-id"
+            applicationInstanceId": "myInstanceId"          
+          payload:                    
+            idProduto: "{{randomInt(65635)}}"      
+            descricao: "{{randomFullName()}}"           
+            preco: "{{randomInt(65635)}}"   
+            dataAtualizacao: "{{now(dd/MM/yyyy HH:mm:ss)}}"
   schemas:
     produtoPayload:
       type: object
-      schemaFormat: application/schema+json
+      schemaFormat: application/cloudevents+json; charset=UTF-8
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+         $ref: '#/components/schemas/produtoData'
+
+    produtoData:
+      type: object
       properties:
         idProduto:
           type: integer
@@ -126,3 +121,4 @@ components:
           type: string      
           description: Data da alteração/criação do produto. 
           format": "date-time"     
+    

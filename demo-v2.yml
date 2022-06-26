@@ -86,25 +86,17 @@ components:
       summary: Evento para o produto
       payload:
          $ref: "#/components/schemas/produtoPayload"
-      examples: [
-        {
-          "name": "produto-criado-1s",
-          "summary": "Exemplo de mensagem",
-          "headers": {
-            "correlationId": "my-correlation-id",
-            "applicationInstanceId": "myInstanceId"
-          },
-          "payload": {
-                   
-                          "idProduto":1,      
-                          "descricao":"Celular bom",                  
-                          "preco":1.99,
-                          "dataAtualizacao":"2022-05-23T13:06:42.375-0300"
-
-          }
-        }
-      ]
-
+      examples:        
+        - name: "produto-criado"
+          summary: "Exemplo de mensagem para o produto criado"
+          headers: 
+            correlationId": "my-correlation-id"
+            applicationInstanceId": "myInstanceId"          
+          payload:                    
+            idProduto: "{{randomInt(65635)}}"      
+            descricao: "{{randomFullName()}}"           
+            preco: "{{randomInt(65635)}}"   
+            dataAtualizacao: "{{now(dd/MM/yyyy HH:mm:ss)}}"
   schemas:
     produtoPayload:
       type: object
@@ -126,3 +118,4 @@ components:
           type: string      
           description: Data da alteração/criação do produto. 
           format": "date-time"     
+    
